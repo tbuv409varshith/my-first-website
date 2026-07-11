@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recipe Mood</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100">
+  <div class="max-w-2xl mx-auto px-4 py-10">
+    <header class="text-center mb-10">
+      <h1 class="text-4xl font-bold text-orange-900">Recipe Mood</h1>
+      <p class="text-orange-700 mt-2">Pick how you feel, and we'll suggest something to cook.</p>
+    </header>
+
+    <section id="mood-section">
+      <h2 class="text-lg font-semibold text-orange-900 mb-4">How are you feeling?</h2>
+      <div id="mood-buttons" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
+    </section>
+
+    <section id="recipe-section" class="hidden mt-10">
+      <div class="bg-white rounded-2xl shadow-lg p-6 border border-orange-100">
+        <div class="flex items-start justify-between gap-4 mb-4">
+          <div>
+            <p id="recipe-mood" class="text-sm uppercase tracking-wide text-orange-500 font-medium"></p>
+            <h2 id="recipe-name" class="text-2xl font-bold text-orange-900 mt-1"></h2>
+          </div>
+          <button id="change-mood-btn" class="text-sm text-orange-600 hover:text-orange-800 underline shrink-0">
+            Change mood
+          </button>
+        </div>
+
+        <p id="recipe-description" class="text-orange-800 mb-6"></p>
+
+        <div class="mb-4">
+          <h3 class="font-semibold text-orange-900 mb-2">Ingredients</h3>
+          <p id="recipe-ingredients" class="text-orange-800 leading-relaxed"></p>
+        </div>
+
+        <div class="mb-6">
+          <h3 class="font-semibold text-orange-900 mb-2">Instructions</h3>
+          <p id="recipe-instructions" class="text-orange-800 leading-relaxed"></p>
+        </div>
+
+        <button id="new-recipe-btn" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-4 rounded-xl transition">
+          Show me another recipe
+        </button>
+      </div>
+    </section>
+
+    <p id="message" class="hidden mt-6 text-center text-orange-700"></p>
+  </div>
+
+  <script>
+    const moodEmojis = {
+      happy: '😊',
+      sad: '😢',
+      stressed: '😰',
+      cozy: '🛋️',
+      energetic: '⚡',
+      romantic: '💕'
+    };
+
+    const recipes = [
+      { id: 1, mood: 'happy', name: 'Sunshine Lemon Pasta', description: 'Bright, zesty pasta that tastes like a good mood.', ingredients: '8 oz spaghetti, 2 lemons (zest + juice), 3 tbsp olive oil, 2 cloves garlic, 1/4 cup parmesan, salt, pepper, fresh basil', instructions: 'Cook pasta. Sauté garlic in olive oil. Toss pasta with lemon zest, juice, parmesan, and basil. Season and serve warm.' },
+      { id: 2, mood: 'happy', name: 'Rainbow Fruit Parfait', description: 'Colorful layers of fruit and yogurt for a cheerful snack.', ingredients: '2 cups Greek yogurt, 1 cup granola, 1 cup strawberries, 1 cup blueberries, 1 mango, 2 tbsp honey', instructions: 'Dice fruit. Layer yogurt, fruit, and granola in glasses. Drizzle with honey and serve immediately.' },
+      { id: 3, mood: 'happy', name: 'Confetti Veggie Tacos', description: 'Crunchy, colorful tacos that feel like a little celebration.', ingredients: '8 small tortillas, 1 can black beans, 1 cup corn, 1 bell pepper, 1 avocado, lime, cilantro, cumin, salt', instructions: 'Warm tortillas. Mix beans, corn, and diced pepper with cumin. Fill tacos, top with avocado, cilantro, and lime.' },
+      { id: 4, mood: 'sad', name: 'Cozy Tomato Soup', description: 'Warm, gentle soup for slow, comforting evenings.', ingredients: '2 tbsp butter, 1 onion, 2 cloves garlic, 1 can crushed tomatoes, 2 cups broth, 1/2 cup cream, salt, pepper, croutons', instructions: 'Sauté onion and garlic in butter. Add tomatoes and broth, simmer 20 minutes. Blend smooth, stir in cream, and serve with croutons.' },
+      { id: 5, mood: 'sad', name: 'Classic Grilled Cheese', description: 'Melty, familiar comfort in sandwich form.', ingredients: '4 slices bread, 4 slices cheddar, 2 tbsp butter', instructions: 'Butter bread, add cheese, and grill in a pan over medium heat until golden and cheese melts. Cut and serve warm.' },
+      { id: 6, mood: 'sad', name: 'Honey Cinnamon Oatmeal', description: 'Soft, sweet breakfast that feels like a hug.', ingredients: '1 cup rolled oats, 2 cups milk, 2 tbsp honey, 1 tsp cinnamon, pinch of salt, banana slices', instructions: 'Simmer oats with milk and salt until creamy. Stir in honey and cinnamon. Top with banana and serve.' },
+      { id: 7, mood: 'stressed', name: 'One-Pan Garlic Chicken', description: 'Minimal cleanup, maximum calm — everything cooks in one pan.', ingredients: '4 chicken thighs, 2 cups broccoli, 2 tbsp olive oil, 4 cloves garlic, lemon, salt, pepper, paprika', instructions: 'Season chicken, sear in a pan, add broccoli and garlic, cover and cook until done. Finish with lemon juice.' },
+      { id: 8, mood: 'stressed', name: '5-Minute Avocado Toast', description: 'Fast, nourishing, and no fuss.', ingredients: '2 slices sourdough, 1 ripe avocado, lemon juice, chili flakes, salt, olive oil', instructions: 'Toast bread. Mash avocado with lemon and salt. Spread on toast, drizzle olive oil, and sprinkle chili flakes.' },
+      { id: 9, mood: 'stressed', name: 'Sheet Pan Salmon', description: 'Set it and forget it — dinner without the mental load.', ingredients: '2 salmon fillets, 1 lb asparagus, 2 tbsp olive oil, garlic powder, lemon, salt, pepper', instructions: 'Place salmon and asparagus on a sheet pan. Drizzle with oil and season. Bake at 400°F for 15 minutes. Serve with lemon.' },
+      { id: 10, mood: 'cozy', name: 'Creamy Mushroom Risotto', description: 'Slow-stirred and deeply comforting.', ingredients: '1 cup arborio rice, 4 cups warm broth, 8 oz mushrooms, 1 onion, 2 tbsp butter, 1/2 cup parmesan, thyme', instructions: 'Sauté mushrooms and onion. Add rice, ladle in broth while stirring until creamy. Finish with butter, parmesan, and thyme.' },
+      { id: 11, mood: 'cozy', name: 'Baked Mac and Cheese', description: 'Golden, cheesy, and perfect for curling up on the couch.', ingredients: '8 oz macaroni, 2 tbsp butter, 2 tbsp flour, 2 cups milk, 2 cups cheddar, breadcrumbs, salt, pepper', instructions: 'Make a cheese sauce, toss with cooked pasta, top with breadcrumbs, and bake at 375°F until bubbly and golden.' },
+      { id: 12, mood: 'cozy', name: 'Chai-Spiced Hot Chocolate', description: 'A warm mug for rainy afternoons.', ingredients: '2 cups milk, 2 tbsp cocoa, 2 tbsp sugar, 1/2 tsp cinnamon, pinch cardamom, pinch nutmeg, whipped cream', instructions: 'Warm milk with cocoa, sugar, and spices. Whisk until smooth. Pour into mugs and top with whipped cream.' },
+      { id: 13, mood: 'energetic', name: 'Power Protein Bowl', description: 'Fuel for when you want to move and do things.', ingredients: '1 cup quinoa, 1 cup chickpeas, 1 cup spinach, 1 avocado, cherry tomatoes, lemon-tahini dressing', instructions: 'Cook quinoa. Arrange with chickpeas, spinach, avocado, and tomatoes. Drizzle with lemon-tahini dressing.' },
+      { id: 14, mood: 'energetic', name: 'Spicy Peanut Noodles', description: 'Bold flavors to match a high-energy day.', ingredients: '8 oz noodles, 3 tbsp peanut butter, 1 tbsp soy sauce, 1 tbsp sriracha, lime juice, scallions, crushed peanuts', instructions: 'Cook noodles. Whisk sauce with peanut butter, soy, sriracha, and lime. Toss noodles with sauce and top with scallions and peanuts.' },
+      { id: 15, mood: 'energetic', name: 'Green Smoothie Bowl', description: 'Fresh, vibrant, and ready in minutes.', ingredients: '1 banana, 1 cup spinach, 1/2 cup frozen mango, 1/2 cup yogurt, granola, berries, chia seeds', instructions: 'Blend banana, spinach, mango, and yogurt until thick. Pour into a bowl and top with granola, berries, and chia seeds.' },
+      { id: 16, mood: 'romantic', name: 'Garlic Butter Shrimp', description: 'Elegant, quick, and perfect for a special night in.', ingredients: '1 lb shrimp, 4 tbsp butter, 4 cloves garlic, white wine, parsley, lemon, salt, pepper', instructions: 'Sauté garlic in butter, add shrimp, cook 2 minutes per side. Deglaze with wine, finish with parsley and lemon.' },
+      { id: 17, mood: 'romantic', name: 'Chocolate Lava Cakes', description: 'Rich dessert with a molten center — dinner date classic.', ingredients: '4 oz dark chocolate, 4 tbsp butter, 2 eggs, 2 egg yolks, 1/4 cup sugar, 2 tbsp flour, pinch salt', instructions: 'Melt chocolate and butter. Whisk eggs, yolks, and sugar, fold in chocolate and flour. Bake in ramekins at 425°F for 12 minutes.' },
+      { id: 18, mood: 'romantic', name: 'Caprese Salad with Balsamic', description: 'Simple, beautiful, and effortlessly romantic.', ingredients: '2 large tomatoes, 8 oz fresh mozzarella, fresh basil, olive oil, balsamic glaze, salt, pepper', instructions: 'Slice tomatoes and mozzarella. Arrange with basil, drizzle olive oil and balsamic, season lightly, and serve.' }
+    ];
+
+    const moodButtons = document.getElementById('mood-buttons');
+    const moodSection = document.getElementById('mood-section');
+    const recipeSection = document.getElementById('recipe-section');
+    const messageEl = document.getElementById('message');
+    const newRecipeBtn = document.getElementById('new-recipe-btn');
+    const changeMoodBtn = document.getElementById('change-mood-btn');
+
+    let currentMood = null;
+    let seenRecipeIds = [];
+
+    function showMessage(text) {
+      messageEl.textContent = text;
+      messageEl.classList.remove('hidden');
+    }
+
+    function hideMessage() {
+      messageEl.classList.add('hidden');
+    }
+
+    function renderRecipe(recipe) {
+      document.getElementById('recipe-mood').textContent = `${moodEmojis[recipe.mood] || ''} ${recipe.mood}`;
+      document.getElementById('recipe-name').textContent = recipe.name;
+      document.getElementById('recipe-description').textContent = recipe.description;
+      document.getElementById('recipe-ingredients').textContent = recipe.ingredients;
+      document.getElementById('recipe-instructions').textContent = recipe.instructions;
+
+      moodSection.classList.add('hidden');
+      recipeSection.classList.remove('hidden');
+      hideMessage();
+    }
+
+    function resetToMoodPicker() {
+      currentMood = null;
+      seenRecipeIds = [];
+      recipeSection.classList.add('hidden');
+      moodSection.classList.remove('hidden');
+      hideMessage();
+    }
+
+    function getRandomRecipe(mood, excludeIds) {
+      const available = recipes.filter((r) => r.mood === mood && !excludeIds.includes(r.id));
+      if (available.length === 0) return null;
+      return available[Math.floor(Math.random() * available.length)];
+    }
+
+    function loadRecipe(mood) {
+      const recipe = getRandomRecipe(mood, seenRecipeIds);
+
+      if (!recipe) {
+        showMessage('No more recipes for this mood. Try changing your mood!');
+        return;
+      }
+
+      seenRecipeIds.push(recipe.id);
+      renderRecipe(recipe);
+    }
+
+    function loadMoods() {
+      const moods = [...new Set(recipes.map((r) => r.mood))].sort();
+
+      moodButtons.innerHTML = moods.map((mood) => `
+        <button data-mood="${mood}" class="mood-btn bg-white hover:bg-orange-50 border border-orange-200 rounded-xl py-4 px-3 text-orange-900 font-medium capitalize transition shadow-sm">
+          <span class="text-2xl block mb-1">${moodEmojis[mood] || '🍽️'}</span>
+          ${mood}
+        </button>
+      `).join('');
+
+      document.querySelectorAll('.mood-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          currentMood = btn.dataset.mood;
+          seenRecipeIds = [];
+          loadRecipe(currentMood);
+        });
+      });
+    }
+
+    newRecipeBtn.addEventListener('click', () => {
+      if (currentMood) loadRecipe(currentMood);
+    });
+
+    changeMoodBtn.addEventListener('click', resetToMoodPicker);
+
+    loadMoods();
+  </script>
+</body>
+</html>
